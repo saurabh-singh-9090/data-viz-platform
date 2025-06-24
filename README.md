@@ -6,6 +6,14 @@ A modern, responsive data visualization platform built with React, TypeScript, a
 
 **[View Live Application](https://saurabh-singh-9090.github.io/data-viz-platform/)**
 
+## Snapshots
+
+<img width="1466" alt="image" src="https://github.com/user-attachments/assets/681d5b3c-8fb1-4549-8857-a83ba03c651c" />
+<img width="1461" alt="image" src="https://github.com/user-attachments/assets/1c06aeb4-453b-4dbf-88c8-9b94f6e1af82" />
+<img width="752" alt="image" src="https://github.com/user-attachments/assets/79a6cf3b-a07e-42cb-baa8-5d678ce3adaf" />
+
+
+
 ## 📋 Table of Contents
 
 - [Features](#features)
