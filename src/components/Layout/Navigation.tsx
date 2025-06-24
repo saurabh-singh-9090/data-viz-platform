@@ -4,10 +4,11 @@ import {
   HiChartBar, 
   HiCog, 
   HiBell, 
-  HiUser,
   HiSearch,
-  HiMenu
+  HiMenu,
+  HiLogout
 } from 'react-icons/hi';
+import { useAuth } from '../../hooks/useAuth';
 
 interface NavigationProps {
   activeTab: string;
@@ -16,6 +17,8 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useAuth();
 
   const sidebarItems = [
     { id: 'home', icon: HiHome, label: 'Home' },
@@ -32,6 +35,24 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setShowUserMenu(false);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
+  const getUserDisplayName = () => {
+    return user?.displayName || user?.email?.split('@')[0] || 'User';
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -63,9 +84,34 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
         </nav>
         
         <div className="mt-auto">
-          <button className="p-3 text-gray-400 hover:text-white hover:bg-[#525252] rounded-lg transition-colors">
-            <HiUser className="w-6 h-6" />
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="p-3 text-gray-400 hover:text-white hover:bg-[#525252] rounded-lg transition-colors flex items-center justify-center"
+              title={getUserDisplayName()}
+            >
+              <div className="w-6 h-6 bg-[#C9FF3B] rounded-full flex items-center justify-center text-black text-sm font-semibold">
+                {getUserInitials()}
+              </div>
+            </button>
+            
+            {/* User Menu Dropdown */}
+            {showUserMenu && (
+              <div className="absolute bottom-full left-full ml-2 mb-2 w-48 bg-[#242424] border border-gray-600 rounded-lg shadow-lg py-2 z-50">
+                <div className="px-4 py-2 border-b border-gray-600">
+                  <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
+                  <p className="text-xs text-gray-400">{user?.email}</p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-[#5A5A5A] hover:text-white transition-colors"
+                >
+                  <HiLogout className="w-4 h-4 mr-2" />
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -110,8 +156,47 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
               className="pl-10 pr-4 py-2 bg-[#0E0D0D] border border-white rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
+          
+          {/* User Avatar in Top Nav (for mobile/when sidebar is hidden) */}
+          {!isSidebarOpen && (
+            <div className="relative">
+              <button 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-[#525252] rounded-lg transition-colors flex items-center justify-center"
+                title={getUserDisplayName()}
+              >
+                <div className="w-6 h-6 bg-[#C9FF3B] rounded-full flex items-center justify-center text-black text-sm font-semibold">
+                  {getUserInitials()}
+                </div>
+              </button>
+              
+              {showUserMenu && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-[#242424] border border-gray-600 rounded-lg shadow-lg py-2 z-50">
+                  <div className="px-4 py-2 border-b border-gray-600">
+                    <p className="text-sm font-medium text-white">{getUserDisplayName()}</p>
+                    <p className="text-xs text-gray-400">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-[#5A5A5A] hover:text-white transition-colors"
+                  >
+                    <HiLogout className="w-4 h-4 mr-2" />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+      
+      {/* Overlay to close user menu when clicking outside */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-20" 
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
     </>
   );
 };

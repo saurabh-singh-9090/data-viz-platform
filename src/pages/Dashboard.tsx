@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   HiLightningBolt,
   HiChevronUp,
@@ -14,9 +14,14 @@ import { openSlideOver } from "../store/slices/uiSlice";
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [isResultsExpanded, setIsResultsExpanded] = useState(true);
 
   const handleEditVariables = () => {
     dispatch(openSlideOver({ type: "variables" }));
+  };
+
+  const toggleResults = () => {
+    setIsResultsExpanded(!isResultsExpanded);
   };
 
   return (
@@ -52,13 +57,22 @@ const Dashboard: React.FC = () => {
               Best Scenario Results
             </h2>
           </div>
-          <div className="px-2 py-1 text-[#C9FF3B] hover:text-white transition-colors hover:bg-[#525252] rounded-xl border border-[#C9FF3B]">
-            <HiChevronUp className="w-4 h-4" />
-          </div>
+          <button 
+            onClick={toggleResults}
+            className="px-2 py-1 text-[#C9FF3B] hover:text-white transition-colors hover:bg-[#525252] rounded-xl border border-[#C9FF3B]"
+          >
+            {isResultsExpanded ? (
+              <HiChevronUp className="w-4 h-4" />
+            ) : (
+              <HiChevronDown className="w-4 h-4" />
+            )}
+          </button>
         </div>
 
-        <div className="space-y-3">
-          <div className="card py-4 px-6 border-1 border-[#C8E972] h-14 flex justify-between items-center bg-[#161618]">
+        <div className={`space-y-3 transition-all duration-300 ease-in-out overflow-hidden ${
+          isResultsExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="card py-4 px-6 border-1 border-[#C8E972] min-h-14 flex justify-between items-center bg-[#161618]">
             <div className="text-sm text-[#C9FF3B]">
               The best found configuration based on profit is characterized by
               11 zones (max) with charging stations and 48 total number of
@@ -69,7 +83,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="card py-4 px-6 border-1 border-[#C8E972] h-14 flex justify-between items-center bg-[#161618]">
+          <div className="card py-4 px-6 border-1 border-[#C8E972] min-h-14 flex justify-between items-center bg-[#161618]">
             <div className="text-sm text-[#B3E237]">
               The best found configuration based on satisfied demand is
               characterized by 11 zones (max) with charging stations and 48
