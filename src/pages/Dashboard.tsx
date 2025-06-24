@@ -4,7 +4,6 @@ import {
   HiChevronUp,
   HiChevronDown,
   HiRefresh,
-  HiShare,
   HiPlus,
   HiUpload,
 } from "react-icons/hi";
