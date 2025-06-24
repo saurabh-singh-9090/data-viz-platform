@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   ComposedChart,
   Line,
@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { HiArrowUp, HiQuestionMarkCircle } from 'react-icons/hi';
 import { useAppSelector, useAppDispatch } from '../../hooks/redux';
+import { selectChartData } from '../../store/slices/dashboardSlice';
 import { showTooltip, hideTooltip } from '../../store/slices/uiSlice';
 import type { DataPoint } from '../../types';
 
@@ -23,7 +24,8 @@ interface CustomDotProps {
   onMouseLeave?: () => void;
 }
 
-const CustomDot: React.FC<CustomDotProps> = ({ cx, cy, payload, onMouseEnter, onMouseLeave }) => {
+// Memoized CustomDot component
+const CustomDot = React.memo<CustomDotProps>(({ cx, cy, payload, onMouseEnter, onMouseLeave }) => {
   if (!cx || !cy || !payload) return null;
 
   const isHighlighted = payload.metadata?.aboveTarget;
@@ -41,39 +43,86 @@ const CustomDot: React.FC<CustomDotProps> = ({ cx, cy, payload, onMouseEnter, on
       onMouseLeave={onMouseLeave}
     />
   );
-};
+});
+
+CustomDot.displayName = 'CustomDot';
+
+// Memoized tooltip component
+const ChartTooltip = React.memo<{
+  tooltip: {
+    x: number;
+    y: number;
+    content: {
+      title: string;
+      value: string;
+      description: string;
+      metadata?: { showArrow?: boolean };
+    };
+  };
+  tooltipRef: React.RefObject<HTMLDivElement | null>;
+}>(({ tooltip, tooltipRef }) => (
+  <div
+    ref={tooltipRef}
+    className="absolute z-50 bg-[#2A2D2F] rounded-lg p-4 shadow-xl border border-gray-600 min-w-[200px]"
+    style={{
+      left: tooltip.x - 100,
+      top: tooltip.y - 80,
+      pointerEvents: 'auto',
+    }}
+  >
+    {/* Header with value and info icon */}
+    <div className="flex items-start justify-between mb-3">
+      <div className="text-white text-2xl font-bold">{tooltip.content.value}</div>
+      <HiQuestionMarkCircle className="w-5 h-5 text-gray-400 mt-1" />
+    </div>
+    
+    {/* Percentage with arrow */}
+    {tooltip.content.metadata?.showArrow && (
+      <div className="flex items-center text-[#C9FF3B]">
+        <HiArrowUp className="w-4 h-4 mr-1 border border-[#C9FF3B] rounded-full p-[2px] bg-[#525252]" />
+        <span className="text-sm">
+          {tooltip.content.description}
+        </span>
+      </div>
+    )}
+    
+    {/* Title */}
+    <div className="text-gray-300 text-sm mt-2">
+      {tooltip.content.title}
+    </div>
+  </div>
+));
+
+ChartTooltip.displayName = 'ChartTooltip';
 
 const InteractiveChart: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { chartData } = useAppSelector((state) => state.dashboard);
+  // Use memoized selector for better performance
+  const chartData = useAppSelector(selectChartData);
   const { tooltip, isTooltipVisible } = useAppSelector((state) => state.ui);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside tooltip to hide it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isTooltipVisible &&
-        tooltipRef.current &&
-        chartRef.current &&
-        !tooltipRef.current.contains(event.target as Node) &&
-        !chartRef.current.contains(event.target as Node)
-      ) {
-        dispatch(hideTooltip());
-      }
-    };
+  // Memoize chart configuration
+  const chartConfig = useMemo(() => ({
+    margin: { top: 20, right: 30, left: 40, bottom: 40 },
+    yAxisDomain: [0, 100000],
+    yAxisTicks: [20000, 40000, 60000, 80000, 100000],
+  }), []);
 
-    if (isTooltipVisible) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+  // Memoize Y-axis formatter
+  const formatYAxis = useCallback((value: number) => {
+    return `$${(value / 1000).toFixed(0)}K`;
+  }, []);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isTooltipVisible, dispatch]);
+  // Memoize July index calculation
+  const julyIndex = useMemo(() => 
+    chartData.findIndex(point => point.date === 'Jul'), 
+    [chartData]
+  );
 
-  const handleDotMouseEnter = (data: DataPoint, x: number, y: number) => {
+  // Memoized dot mouse enter handler
+  const handleDotMouseEnter = useCallback((data: DataPoint, x: number, y: number) => {
     // Calculate percentage above target or use a baseline
     let percentageText = '';
     if (data.metadata?.aboveTarget && data.metadata?.target) {
@@ -102,25 +151,50 @@ const InteractiveChart: React.FC = () => {
       y: y - 60,
       content: tooltipContent,
     }));
-  };
+  }, [dispatch]);
 
-  const handleDotMouseLeave = () => {
+  const handleDotMouseLeave = useCallback(() => {
     dispatch(hideTooltip());
-  };
+  }, [dispatch]);
 
-  const formatYAxis = (value: number) => {
-    return `$${(value / 1000).toFixed(0)}K`;
-  };
+  // Memoized dot renderer
+  const renderCustomDot = useCallback((props: { cx?: number; cy?: number; payload?: DataPoint }) => (
+    <CustomDot
+      {...props}
+      onMouseEnter={handleDotMouseEnter}
+      onMouseLeave={handleDotMouseLeave}
+    />
+  ), [handleDotMouseEnter, handleDotMouseLeave]);
 
-  // Find the July data point for reference line
-  const julyIndex = chartData.findIndex(point => point.date === 'Jul');
+  // Handle click outside tooltip to hide it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isTooltipVisible &&
+        tooltipRef.current &&
+        chartRef.current &&
+        !tooltipRef.current.contains(event.target as Node) &&
+        !chartRef.current.contains(event.target as Node)
+      ) {
+        dispatch(hideTooltip());
+      }
+    };
+
+    if (isTooltipVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTooltipVisible, dispatch]);
 
   return (
     <div ref={chartRef} className="relative w-full h-full focus:outline-none" tabIndex={-1}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 40, bottom: 40 }}
+          margin={chartConfig.margin}
         >
           <CartesianGrid strokeDasharray="1 1" stroke="#404040" horizontal={true} vertical={false} />
           
@@ -146,8 +220,8 @@ const InteractiveChart: React.FC = () => {
             tickLine={false}
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
             tickFormatter={formatYAxis}
-            domain={[0, 100000]}
-            ticks={[20000, 40000, 60000, 80000, 100000]}
+            domain={chartConfig.yAxisDomain}
+            ticks={chartConfig.yAxisTicks}
           />
           
           {/* Background bars */}
@@ -164,13 +238,7 @@ const InteractiveChart: React.FC = () => {
             dataKey="value"
             stroke="#C9FF3B"
             strokeWidth={3}
-            dot={(props) => (
-              <CustomDot
-                {...props}
-                onMouseEnter={handleDotMouseEnter}
-                onMouseLeave={handleDotMouseLeave}
-              />
-            )}
+            dot={renderCustomDot}
             activeDot={false}
           />
         </ComposedChart>
@@ -178,34 +246,10 @@ const InteractiveChart: React.FC = () => {
 
       {/* Custom Tooltip */}
       {isTooltipVisible && tooltip && (
-        <div
-          ref={tooltipRef}
-          className="absolute z-50 bg-[#2A2D2F] rounded-lg p-4 shadow-xl border border-gray-600 min-w-[200px]"
-          style={{
-            left: tooltip.x - 100,
-            top: tooltip.y - 80,
-            pointerEvents: 'auto',
-          }}
-        >
-          {/* Header with value and info icon */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="text-white text-2xl font-bold">{tooltip.content.value}</div>
-            <HiQuestionMarkCircle className="w-5 h-5 text-gray-400 mt-1" />
-          </div>
-          
-          {/* Percentage with arrow */}
-          {tooltip.content.metadata?.showArrow && (
-            <div className="flex items-center text-[#C9FF3B]">
-              <HiArrowUp className="w-4 h-4 mr-1 border border-[#C9FF3B] rounded-full p-[2px] bg-[#525252]" />
-              <span className="text-sm">
-                {tooltip.content.description}
-              </span>
-            </div>
-          )}
-        </div>
+        <ChartTooltip tooltip={tooltip} tooltipRef={tooltipRef} />
       )}
     </div>
   );
 };
 
-export default InteractiveChart; 
+export default React.memo(InteractiveChart); 

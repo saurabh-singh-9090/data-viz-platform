@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { HiEye, HiEyeOff, HiMail, HiLockClosed } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,7 +16,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
 
   const { signIn, signInWithGoogle, isLoading, error } = useAuth();
 
-  const validateForm = () => {
+  // Memoized validation function
+  const validateForm = useCallback(() => {
     const errors: { email?: string; password?: string } = {};
 
     if (!email) {
@@ -33,9 +34,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [email, password]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoized event handlers
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -46,15 +48,40 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
       // Error is handled by Redux
       console.error('Login failed:', error);
     }
-  };
+  }, [email, password, signIn, validateForm]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     try {
       await signInWithGoogle();
     } catch (error) {
       console.error('Google sign in failed:', error);
     }
-  };
+  }, [signInWithGoogle]);
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+
+  // Memoized input classes
+  const getInputClasses = useCallback((hasError: boolean) => 
+    `appearance-none relative block w-full px-3 pl-10 py-3 border ${
+      hasError ? 'border-red-500' : 'border-gray-600'
+    } placeholder-gray-400 text-white bg-[#242424] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9FF3B] focus:border-transparent`,
+    []
+  );
+
+  const getPasswordInputClasses = useCallback((hasError: boolean) => 
+    `appearance-none relative block w-full px-3 pl-10 pr-10 py-3 border ${
+      hasError ? 'border-red-500' : 'border-gray-600'
+    } placeholder-gray-400 text-white bg-[#242424] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9FF3B] focus:border-transparent`,
+    []
+  );
+
+  // Memoized button text
+  const submitButtonText = useMemo(() => 
+    isLoading ? 'Signing in...' : 'Sign in',
+    [isLoading]
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0E0D0D] py-12 px-4 sm:px-6 lg:px-8">
@@ -97,9 +124,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`appearance-none relative block w-full px-3 pl-10 py-3 border ${
-                    validationErrors.email ? 'border-red-500' : 'border-gray-600'
-                  } placeholder-gray-400 text-white bg-[#242424] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9FF3B] focus:border-transparent`}
+                  className={getInputClasses(!!validationErrors.email)}
                   placeholder="Email address"
                 />
               </div>
@@ -123,15 +148,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`appearance-none relative block w-full px-3 pl-10 pr-10 py-3 border ${
-                    validationErrors.password ? 'border-red-500' : 'border-gray-600'
-                  } placeholder-gray-400 text-white bg-[#242424] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9FF3B] focus:border-transparent`}
+                  className={getPasswordInputClasses(!!validationErrors.password)}
                   placeholder="Password"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={togglePasswordVisibility}
                     className="text-gray-400 hover:text-white focus:outline-none"
                   >
                     {showPassword ? (
@@ -164,7 +187,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
               disabled={isLoading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-black bg-[#C9FF3B] hover:bg-[#B3E237] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C9FF3B] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {submitButtonText}
             </button>
 
             <div className="relative">
@@ -192,4 +215,4 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onForgotPasswor
   );
 };
 
-export default LoginForm; 
+export default React.memo(LoginForm); 

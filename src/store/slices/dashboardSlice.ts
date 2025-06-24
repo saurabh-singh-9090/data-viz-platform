@@ -1,6 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Variable, DataPoint, KPICard } from '../../types';
+import type { RootState } from '../index';
 
 interface DashboardState {
   variables: Variable[];
@@ -203,6 +204,9 @@ const dashboardSlice = createSlice({
     setTimeRange: (state, action: PayloadAction<{ start: string; end: string }>) => {
       state.timeRange = action.payload;
     },
+    updateKPICards: (state, action: PayloadAction<KPICard[]>) => {
+      state.kpiCards = action.payload;
+    },
   },
 });
 
@@ -214,6 +218,80 @@ export const {
   setLoading,
   setError,
   setTimeRange,
+  updateKPICards
 } = dashboardSlice.actions;
+
+// Memoized selectors for better performance
+export const selectDashboard = (state: RootState) => state.dashboard;
+
+export const selectVariables = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.variables
+);
+
+export const selectActiveVariables = createSelector(
+  [selectVariables],
+  (variables) => variables.filter(variable => variable.active)
+);
+
+export const selectVariablesByCategory = createSelector(
+  [selectVariables],
+  (variables) => variables.reduce((acc, variable) => {
+    if (!acc[variable.category]) {
+      acc[variable.category] = [];
+    }
+    acc[variable.category].push(variable);
+    return acc;
+  }, {} as Record<string, Variable[]>)
+);
+
+export const selectChartData = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.chartData
+);
+
+export const selectKPICards = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.kpiCards
+);
+
+export const selectDashboardLoading = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.isLoading
+);
+
+export const selectDashboardError = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.error
+);
+
+export const selectTimeRange = createSelector(
+  [selectDashboard],
+  (dashboard) => dashboard.timeRange
+);
+
+// Complex memoized selectors
+export const selectVariablesStats = createSelector(
+  [selectVariables],
+  (variables) => ({
+    total: variables.length,
+    active: variables.filter(v => v.active).length,
+    byCategory: variables.reduce((acc, variable) => {
+      acc[variable.category] = (acc[variable.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  })
+);
+
+export const selectChartDataWithMetadata = createSelector(
+  [selectChartData],
+  (chartData) => ({
+    data: chartData,
+    maxValue: Math.max(...chartData.map(d => d.value)),
+    minValue: Math.min(...chartData.map(d => d.value)),
+    averageValue: chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length,
+    totalDataPoints: chartData.length
+  })
+);
 
 export default dashboardSlice.reducer; 

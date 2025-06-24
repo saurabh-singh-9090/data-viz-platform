@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import {
   HiLightningBolt,
   HiChevronUp,
@@ -6,23 +6,146 @@ import {
   HiRefresh,
   HiShare,
   HiPlus,
+  HiUpload,
 } from "react-icons/hi";
-import InteractiveChart from "../components/Chart/InteractiveChart";
-import KPICards from "../components/Dashboard/KPICards";
 import { useAppDispatch } from "../hooks/redux";
 import { openSlideOver } from "../store/slices/uiSlice";
+
+// Lazy load components
+const InteractiveChart = lazy(() => import("../components/Chart/InteractiveChart"));
+const KPICards = lazy(() => import("../components/Dashboard/KPICards"));
+
+// Loading component for chart and KPI cards
+const ComponentLoader = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#C9FF3B]"></div>
+  </div>
+);
+
+// Memoized result cards data
+const RESULT_CARDS_DATA = [
+  {
+    id: 'profit-config',
+    text: "The best found configuration based on profit is characterized by 11 zones (max) with charging stations and 48 total number of poles.",
+    color: "#C9FF3B"
+  },
+  {
+    id: 'demand-config',
+    text: "The best found configuration based on satisfied demand is characterized by 11 zones (max) with charging stations and 48 total number of poles.",
+    color: "#B3E237"
+  }
+];
+
+// Memoized ResultCard component
+const ResultCard = React.memo<{ data: typeof RESULT_CARDS_DATA[0] }>(({ data }) => (
+  <div className="card py-4 px-6 border-1 border-[#C8E972] min-h-14 flex justify-between items-center bg-[#161618]">
+    <div className="text-sm" style={{ color: data.color }}>
+      {data.text}
+    </div>
+    <div className="transition-colors hover:text-white" style={{ color: data.color }}>
+      <span className="text-xs">•••</span>
+    </div>
+  </div>
+));
+
+ResultCard.displayName = 'ResultCard';
+
+// Memoized header buttons
+const HeaderButtons = React.memo<{
+  onEditVariables: () => void;
+  onRefresh: () => void;
+  onShare: () => void;
+}>(({ onEditVariables, onRefresh, onShare }) => (
+  <div className="flex items-center space-x-3">
+    <button 
+      onClick={onRefresh}
+      className="p-2 text-gray-400 hover:text-white hover:bg-[#5A5A5A] rounded-lg transition-colors border border-[#5A5A5A]"
+    >
+      <HiRefresh className="w-5 h-5" />
+    </button>
+    <button
+      onClick={onEditVariables}
+      className="btn-primary flex items-center space-x-2 text-sm bg-[#242424] py-2 px-2 rounded-md hover:bg-[#5A5A5A] text-white border border-[#5A5A5A]"
+    >
+      <span>Edit Variables</span>
+    </button>
+    <button 
+      onClick={onShare}
+      className="p-2 bg-[#242424] hover:bg-[#5A5A5A] rounded-lg transition-colors border border-[#5A5A5A]"
+    >
+      <HiUpload className="w-5 h-5" />
+    </button>
+  </div>
+));
+
+HeaderButtons.displayName = 'HeaderButtons';
+
+// Memoized results section
+const ResultsSection = React.memo<{
+  isResultsExpanded: boolean;
+  onToggleResults: () => void;
+}>(({ isResultsExpanded, onToggleResults }) => (
+  <div className="space-y-4">
+    <div className="flex items-center space-x-2 justify-between">
+      <div className="flex items-center space-x-2">
+        <span className="text-yellow-400">✨</span>
+        <h2 className="text-lg font-semibold text-white">
+          Best Scenario Results
+        </h2>
+      </div>
+      <button 
+        onClick={onToggleResults}
+        className="px-2 py-1 text-[#C9FF3B] hover:text-white transition-colors hover:bg-[#525252] rounded-xl border border-[#C9FF3B]"
+      >
+        {isResultsExpanded ? (
+          <HiChevronUp className="w-4 h-4" />
+        ) : (
+          <HiChevronDown className="w-4 h-4" />
+        )}
+      </button>
+    </div>
+
+    <div className={`space-y-3 transition-all duration-300 ease-in-out overflow-hidden ${
+      isResultsExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+    }`}>
+      {RESULT_CARDS_DATA.map((cardData) => (
+        <ResultCard key={cardData.id} data={cardData} />
+      ))}
+    </div>
+  </div>
+));
+
+ResultsSection.displayName = 'ResultsSection';
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const [isResultsExpanded, setIsResultsExpanded] = useState(true);
 
-  const handleEditVariables = () => {
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleEditVariables = useCallback(() => {
     dispatch(openSlideOver({ type: "variables" }));
-  };
+  }, [dispatch]);
 
-  const toggleResults = () => {
-    setIsResultsExpanded(!isResultsExpanded);
-  };
+  const handleRefresh = useCallback(() => {
+    // Add refresh logic here
+    console.log('Refreshing dashboard...');
+  }, []);
+
+  const handleShare = useCallback(() => {
+    // Add share logic here
+    console.log('Sharing dashboard...');
+  }, []);
+
+  const toggleResults = useCallback(() => {
+    setIsResultsExpanded(prev => !prev);
+  }, []);
+
+  // Memoized chart options
+  const chartOptions = useMemo(() => [
+    'Unsatisfied Demand %',
+    'Satisfied Demand %',
+    'Revenue'
+  ], []);
 
   return (
     <div className="flex-1 p-6 space-y-6">
@@ -32,69 +155,18 @@ const Dashboard: React.FC = () => {
           <HiLightningBolt className="w-8 h-8 text-yellow-400" />
           <h1 className="text-2xl font-bold text-white">Charging Station</h1>
         </div>
-        <div className="flex items-center space-x-3">
-          <button className="p-2 text-gray-400 hover:text-white hover:bg-[#5A5A5A] rounded-lg transition-colors border border-[#5A5A5A]">
-            <HiRefresh className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleEditVariables}
-            className="btn-primary flex items-center space-x-2 text-sm bg-[#242424] py-2 px-2 rounded-md hover:bg-[#5A5A5A] text-white border border-[#5A5A5A]"
-          >
-            <span>Edit Variables</span>
-          </button>
-          <button className="p-2 bg-[#242424] hover:bg-[#5A5A5A] rounded-lg transition-colors border border-[#5A5A5A]">
-            <HiShare className="w-5 h-5" />
-          </button>
-        </div>
+        <HeaderButtons 
+          onEditVariables={handleEditVariables}
+          onRefresh={handleRefresh}
+          onShare={handleShare}
+        />
       </div>
 
       {/* Best Scenario Results */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2 justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-yellow-400">✨</span>
-            <h2 className="text-lg font-semibold text-white">
-              Best Scenario Results
-            </h2>
-          </div>
-          <button 
-            onClick={toggleResults}
-            className="px-2 py-1 text-[#C9FF3B] hover:text-white transition-colors hover:bg-[#525252] rounded-xl border border-[#C9FF3B]"
-          >
-            {isResultsExpanded ? (
-              <HiChevronUp className="w-4 h-4" />
-            ) : (
-              <HiChevronDown className="w-4 h-4" />
-            )}
-          </button>
-        </div>
-
-        <div className={`space-y-3 transition-all duration-300 ease-in-out overflow-hidden ${
-          isResultsExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}>
-          <div className="card py-4 px-6 border-1 border-[#C8E972] min-h-14 flex justify-between items-center bg-[#161618]">
-            <div className="text-sm text-[#C9FF3B]">
-              The best found configuration based on profit is characterized by
-              11 zones (max) with charging stations and 48 total number of
-              poles.
-            </div>
-            <div className="text-[#C9FF3B] hover:text-white transition-colors">
-              <span className="text-xs">•••</span>
-            </div>
-          </div>
-
-          <div className="card py-4 px-6 border-1 border-[#C8E972] min-h-14 flex justify-between items-center bg-[#161618]">
-            <div className="text-sm text-[#B3E237]">
-              The best found configuration based on satisfied demand is
-              characterized by 11 zones (max) with charging stations and 48
-              total number of poles.
-            </div>
-            <div className="text-[#B3E237] hover:text-white transition-colors">
-              <span className="text-xs">•••</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ResultsSection 
+        isResultsExpanded={isResultsExpanded}
+        onToggleResults={toggleResults}
+      />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -108,15 +180,17 @@ const Dashboard: React.FC = () => {
               <div></div>
               <div className="relative">
                 <select className="bg-[#3A3D3F] border border-gray-600 rounded-lg px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#C9FF3B] appearance-none cursor-pointer">
-                  <option>Unsatisfied Demand %</option>
-                  <option>Satisfied Demand %</option>
-                  <option>Revenue</option>
+                  {chartOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
                 </select>
                 <HiChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
             <div className="h-80 focus:outline-none">
-              <InteractiveChart />
+              <Suspense fallback={<ComponentLoader />}>
+                <InteractiveChart />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -133,7 +207,9 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
           <div className="h-96">
-            <KPICards />
+            <Suspense fallback={<ComponentLoader />}>
+              <KPICards />
+            </Suspense>
           </div>
         </div>
       </div>
@@ -141,4 +217,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default React.memo(Dashboard);
