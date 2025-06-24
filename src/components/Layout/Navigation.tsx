@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   HiHome, 
   HiChartBar, 
@@ -15,6 +15,8 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const sidebarItems = [
     { id: 'home', icon: HiHome, label: 'Home' },
     { id: 'alerts', icon: HiBell, label: 'Alerts' },
@@ -28,11 +30,20 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
     { id: 'parking', label: 'Parking', active: activeTab === 'parking' },
   ];
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <>
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-16 bg-[#0E0D0D] border-r border-gray-700 flex flex-col items-center py-4 z-40">
-        <button className="p-3 text-gray-400 hover:text-white mb-6">
+      <div className={`fixed left-0 top-0 h-full w-16 bg-[#0E0D0D] border-r border-gray-700 flex flex-col items-center py-4 z-40 transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <button 
+          onClick={toggleSidebar}
+          className="p-3 text-gray-400 hover:text-white mb-6"
+        >
           <HiMenu className="w-6 h-6" />
         </button>
         
@@ -59,21 +70,33 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
       </div>
 
       {/* Top Navigation */}
-      <div className="fixed top-0 left-16 right-0 h-16 bg-[#0E0D0D] border-b border-gray-700 flex items-center justify-between px-6 z-30">
+      <div className={`fixed top-0 right-0 h-16 bg-[#0E0D0D] border-b border-gray-700 flex items-center justify-between px-6 z-30 transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'left-16' : 'left-0'
+      }`}>
+        {/* Hamburger menu for when sidebar is hidden */}
+        {!isSidebarOpen && (
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 text-gray-400 hover:text-white mr-4"
+          >
+            <HiMenu className="w-6 h-6" />
+          </button>
+        )}
+
         <div className="flex items-center space-x-6">
           <nav className="flex space-x-1">
             {topNavItems.map((item) => (
-              <button
+              <div
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   item.active
                     ? 'bg-[#242424] text-white'
                     : 'text-white hover:bg-[#242424]'
                 }`}
               >
                 {item.label}
-              </button>
+              </div>
             ))}
           </nav>
         </div>
