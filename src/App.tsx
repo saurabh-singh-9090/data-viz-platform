@@ -11,7 +11,7 @@ function App() {
 
   return (
     <Provider store={store}>
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-[#161618]">
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
         
         {/* Main Content */}
