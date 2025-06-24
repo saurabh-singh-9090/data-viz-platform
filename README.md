@@ -1,154 +1,111 @@
 # Data Visualization Platform
 
-A modern, responsive data visualization dashboard built with React 18, TypeScript, Redux Toolkit, and Tailwind CSS. This application provides interactive charts, variable management, and real-time data insights for charging station analytics.
+A modern, responsive data visualization platform built with React, TypeScript, and Firebase authentication. Features an interactive dashboard for charging station analytics with real-time data visualization and user management.
 
-## 🚀 Features
+## 🌐 Live Demo
 
-### Core Functionality
-- **Interactive Dashboard**: Real-time data visualization with hover tooltips and animations
-- **Variable Management**: Slide-over panel for editing and selecting visualization variables
-- **Context Windows**: Hover-triggered information panels with 1.5-second delay
-- **Responsive Design**: Desktop-first approach with tablet and mobile adaptations
-- **Smooth Animations**: Slide-in, fade-in, and hover effects throughout the interface
+**[View Live Application](https://saurabh-singh-9090.github.io/data-viz-platform/)**
 
-### Key Interactions Implemented
+## 📋 Table of Contents
 
-#### 1. Slide-Over Variable Editing Panel
-- Triggered by clicking "Edit Variables" button
-- Smooth slide-in animation from the right
-- Variable selection with checkboxes
-- Search and autofill functionality
-- Expandable sections for primary/secondary variables
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Setup Instructions](#setup-instructions)
+- [Environment Variables](#environment-variables)
+- [Local Development](#local-development)
+- [Technical Decisions](#technical-decisions)
+- [Known Limitations](#known-limitations)
+- [Time Spent](#time-spent)
+- [Project Structure](#project-structure)
+- [Deployment](#deployment)
 
-#### 2. Data Point Hover Tooltips
-- Interactive chart with custom hover effects
-- Animated tooltips showing detailed information
-- Target line indicators for performance metrics
-- Smooth fade-in animations
+## ✨ Features
 
-#### 3. Variable Context Windows
-- 1.5-second hover delay before showing context
-- Detailed variable descriptions and metadata
-- Positioned relative to hovered element
-- Quick action buttons for variable management
+### 🔐 Authentication System
+- **Email/Password Authentication** - Complete sign up and sign in flow
+- **Google OAuth Integration** - One-click authentication with Google
+- **Password Reset** - Email-based password recovery
+- **Email Verification** - Automatic email verification for new accounts
+- **Protected Routes** - Automatic redirection for unauthenticated users
+- **Persistent Sessions** - User sessions maintained across browser refreshes
+
+### 📊 Dashboard & Visualization
+- **Interactive Charts** - Dynamic data visualization using Recharts
+- **KPI Cards** - Key performance indicators with trend analysis
+- **Multi-tab Navigation** - Charging Stations, Fleet Sizing, and Parking modules
+- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+
+### 🎨 User Interface
+- **Modern Dark Theme** - Professional dark UI with green accent colors
+- **Responsive Navigation** - Adaptive sidebar and mobile-friendly hamburger menu
+- **User Profile Management** - Avatar display with user information and sign-out
+- **Loading States** - Smooth loading indicators and transitions
+- **Error Handling** - User-friendly error messages and error boundaries
+
+### 📱 Mobile Experience
+- **Touch-friendly Interface** - Optimized for mobile interactions
+- **Horizontal Scrollable Navigation** - Mobile-optimized tab navigation
+- **Overlay Sidebar** - Full-screen mobile menu with backdrop
+- **Responsive Typography** - Scalable text and proper spacing
 
 ## 🛠 Tech Stack
 
-- **Frontend Framework**: React 18 with TypeScript
-- **State Management**: Redux Toolkit
-- **Styling**: Tailwind CSS with custom animations
-- **Charts**: Recharts for data visualization
-- **Icons**: React Icons (Heroicons)
-- **Authentication**: Firebase Authentication (configured)
-- **Build Tool**: Vite
-- **Package Manager**: npm
-
-## 📦 Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd data-viz-platform
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Firebase** (Optional)
-   ```bash
-   cp env.example .env
-   # Edit .env with your Firebase credentials
-   ```
-
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
-
-## 🏗 Project Structure
-
-```
-src/
-├── components/           # Reusable UI components
-│   ├── Chart/           # Chart components
-│   │   └── InteractiveChart.tsx
-│   ├── Dashboard/       # Dashboard-specific components
-│   │   ├── KPICards.tsx
-│   │   └── VariablesPanel.tsx
-│   ├── Layout/          # Layout components
-│   │   └── Navigation.tsx
-│   └── UI/              # Generic UI components
-│       └── SlideOver.tsx
-├── hooks/               # Custom React hooks
-│   └── redux.ts         # Typed Redux hooks
-├── pages/               # Page components
-│   └── Dashboard.tsx
-├── store/               # Redux store configuration
-│   ├── index.ts         # Store setup
-│   └── slices/          # Redux slices
-│       ├── authSlice.ts
-│       ├── dashboardSlice.ts
-│       └── uiSlice.ts
-├── types/               # TypeScript type definitions
-│   └── index.ts
-├── firebase/            # Firebase configuration
-│   └── config.ts
-└── utils/               # Utility functions
-```
-
-## 🎨 Component Architecture
-
-### Reusable Components
-- **Navigation**: Sidebar and top navigation with tab switching
-- **InteractiveChart**: Chart with hover interactions and tooltips
-- **KPICards**: Key performance indicator display cards
-- **VariablesPanel**: Variable selection with context windows
-- **SlideOver**: Reusable slide-over panel component
+### Frontend
+- **React 19** - Latest React with modern hooks and concurrent features
+- **TypeScript** - Type-safe development with strong typing
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework for rapid styling
 
 ### State Management
-- **Auth Slice**: User authentication state
-- **Dashboard Slice**: Chart data, variables, and KPIs
-- **UI Slice**: Modal states, tooltips, and slide-over panels
+- **Redux Toolkit** - Modern Redux with simplified store setup
+- **React Redux** - React bindings for Redux state management
+- **Async Thunks** - Handling asynchronous authentication operations
 
-## 🎯 Key Features Implemented
+### Authentication & Backend
+- **Firebase Authentication** - Secure user authentication service
+- **Firebase Analytics** - User behavior tracking and analytics
+- **Environment Variables** - Secure configuration management
 
-### 1. Dashboard Screen
-- Primary data visualization with interactive line chart
-- Variables panel with active variable display
-- KPI cards showing key metrics
-- Best scenario results with highlighted configurations
+### Data Visualization
+- **Recharts** - Composable charting library built on React and D3
+- **React Icons** - Comprehensive icon library including Google icons
 
-### 2. Variable Editing Slide-Over
-- Smooth slide-in animation from right
-- Variable categorization and selection
-- Search functionality with autofill
-- Expandable sections for variable details
-- Real-time variable toggling
+### Development Tools
+- **ESLint** - Code linting and quality enforcement
+- **TypeScript ESLint** - TypeScript-specific linting rules
+- **Autoprefixer** - Automatic CSS vendor prefixing
+- **PostCSS** - CSS processing and optimization
 
-### 3. Interactive Data Points
-- Hover tooltips with fade-in animation
-- Target line indicators
-- Performance metrics display
-- Custom dot styling for highlighted data points
+## 🚀 Setup Instructions
 
-### 4. Context Window System
-- 1.5-second hover delay implementation
-- Dynamic positioning relative to trigger element
-- Detailed variable information display
-- Action buttons for variable management
+### Prerequisites
+- **Node.js** (v18 or higher)
+- **npm** (v8 or higher)
+- **Git**
+- **Firebase Account** (for authentication)
 
-## 🔧 Configuration
+### 1. Clone the Repository
+```bash
+git clone https://github.com/saurabh-singh-9090/data-viz-platform.git
+cd data-viz-platform
+```
 
-### Environment Variables
-Create a `.env` file based on `env.example`:
+### 2. Install Dependencies
+```bash
+npm install
+```
 
+### 3. Firebase Setup
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or use existing one
+3. Enable Authentication:
+   - Go to Authentication → Sign-in method
+   - Enable "Email/Password" provider
+   - Enable "Google" provider (optional)
+4. Get your Firebase configuration from Project Settings
+
+### 4. Environment Configuration
+Create a `.env` file in the project root:
 ```env
 VITE_FIREBASE_API_KEY=your_api_key_here
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -156,61 +113,174 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
+VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
-### Tailwind CSS Configuration
-Custom animations and colors are configured in `tailwind.config.js`:
+### 5. Configure Firebase Authorized Domains
+In Firebase Console → Authentication → Settings → Authorized domains:
+- Add `localhost` (for development)
+- Add your production domain (for deployment)
 
-- Slide-in animations for panels
-- Fade-in animations for tooltips
-- Custom color palette for dark theme
-- Responsive breakpoints for mobile/tablet
+## 🔧 Environment Variables
 
-## 📱 Responsive Design
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_FIREBASE_API_KEY` | Firebase API key | Yes |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain | Yes |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID | Yes |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket | Yes |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID | Yes |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID | Yes |
+| `VITE_FIREBASE_MEASUREMENT_ID` | Firebase analytics measurement ID | No |
 
-- **Desktop**: Full feature set with sidebar navigation
-- **Tablet**: Adapted layout with collapsible elements
-- **Mobile**: Optimized for touch interactions
+**Note:** All variables are prefixed with `VITE_` to make them available in the browser. Fallback values are configured in the Firebase config for development.
 
-## 🚀 Performance Optimizations
+## 💻 Local Development
 
-- **Code Splitting**: Lazy loading of components
-- **Memoization**: React.memo for expensive components
-- **Redux Toolkit**: Optimized state updates with Immer
-- **Tailwind CSS**: Purged unused styles in production
+### Start Development Server
+```bash
+npm run dev
+```
+The application will be available at `http://localhost:5173`
 
-## 🧪 Development
+### Build for Production
+```bash
+npm run build
+```
 
-### Available Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### Preview Production Build
+```bash
+npm run preview
+```
 
-### Adding New Features
-1. Create components in appropriate directories
-2. Add TypeScript types in `src/types/`
-3. Create Redux slices for state management
-4. Implement responsive design with Tailwind CSS
+### Lint Code
+```bash
+npm run lint
+```
 
-## 🔮 Future Enhancements
+### Deploy to GitHub Pages
+```bash
+npm run deploy
+```
 
-- **Authentication**: Complete Firebase auth integration
-- **Data Persistence**: Save user preferences and configurations
-- **Real-time Updates**: WebSocket integration for live data
-- **Export Features**: PDF/CSV export functionality
-- **Advanced Filtering**: Date range and category filters
-- **Themes**: Light/dark mode toggle
-- **Accessibility**: Enhanced ARIA labels and keyboard navigation
+## 🏗 Technical Decisions
 
-## 📄 License
+### Architecture Decisions
 
-This project is built as a take-home assignment for a Senior Frontend Engineer position.
+#### **React + TypeScript**
+- **Rationale**: Provides type safety, better developer experience, and catches errors at compile time
+- **Trade-off**: Slightly longer development time for type definitions vs. runtime error prevention
 
-## 🤝 Contributing
+#### **Redux Toolkit for State Management**
+- **Rationale**: Centralized state management for authentication and UI state
+- **Trade-off**: Additional complexity vs. predictable state updates and debugging capabilities
 
-This is a demonstration project. For questions or suggestions, please reach out to the development team.
+#### **Firebase Authentication**
+- **Rationale**: Secure, scalable authentication with minimal backend setup
+- **Trade-off**: Vendor lock-in vs. rapid development and enterprise-grade security
+
+#### **Tailwind CSS for Styling**
+- **Rationale**: Utility-first approach allows rapid prototyping and consistent design
+- **Trade-off**: Larger HTML classes vs. faster development and smaller CSS bundle
+
+
+### Performance Optimizations
+
+#### **Code Splitting**
+- **Implementation**: Dynamic imports for authentication components
+- **Benefit**: Reduced initial bundle size
+
+#### **Memoization**
+- **Implementation**: React.memo for expensive components
+- **Benefit**: Prevents unnecessary re-renders
+
+## ⚠️ Known Limitations
+
+### Technical Limitations
+1. **Firebase Dependency**: Requires active Firebase project and internet connection
+2. **Browser Compatibility**: Modern browsers only (ES2020+ features)
+
+### Feature Limitations
+1. **Data Source**: Currently uses mock data - needs integration with real APIs
+2. **Offline Support**: No offline functionality implemented
+3. **Real-time Updates**: Charts don't update in real-time (would need WebSocket/Firebase Realtime Database)
+4. **Export Functionality**: No data export capabilities (CSV, PDF, etc.)
+
+### UI/UX Limitations
+1. **Accessibility**: Could benefit from better ARIA labels and keyboard navigation
+2. **Internationalization**: No multi-language support
+
+### Security Considerations
+1. **Environment Variables**: Sensitive config exposed in client bundle (normal for Firebase)
+2. **Rate Limiting**: No client-side rate limiting for API calls
+3. **Input Validation**: Basic validation only (server-side validation recommended)
+
+## ⏱️ Time Spent: approx 7 hours
+
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── Auth/
+│   │   ├── AuthContainer.tsx       # Main auth flow container
+│   │   ├── LoginForm.tsx          # Email/password login
+│   │   ├── SignUpForm.tsx         # User registration
+│   │   ├── ForgotPasswordForm.tsx # Password reset
+│   │   └── ProtectedRoute.tsx     # Route protection
+│   ├── Chart/
+│   │   └── InteractiveChart.tsx   # Main chart component
+│   ├── Dashboard/
+│   │   ├── KPICards.tsx          # Key performance indicators
+│   │   └── VariablesPanel.tsx    # Variable selection panel
+│   ├── Layout/
+│   │   └── Navigation.tsx        # Responsive navigation
+│   └── UI/
+│       ├── SlideOver.tsx         # Slide-out panel
+│       └── ErrorBoundary.tsx     # Error handling
+├── firebase/
+│   └── config.ts                 # Firebase configuration
+├── hooks/
+│   ├── redux.ts                  # Typed Redux hooks
+│   └── useAuth.ts               # Authentication hook
+├── pages/
+│   └── Dashboard.tsx            # Main dashboard page
+├── services/
+│   └── authService.ts           # Firebase auth service
+├── store/
+│   ├── index.ts                 # Redux store configuration
+│   └── slices/
+│       ├── authSlice.ts         # Authentication state
+│       ├── dashboardSlice.ts    # Dashboard state
+│       └── uiSlice.ts          # UI state
+├── types/
+│   └── index.ts                 # TypeScript type definitions
+└── utils/                       # Utility functions
+```
+
+## 🚀 Deployment
+
+The application is deployed on GitHub Pages using GitHub Actions:
+
+### Deployment URL
+**https://saurabh-singh-9090.github.io/data-viz-platform/**
+
+### Deployment Process
+1. Code is pushed to `main` branch
+2. `npm run deploy` builds and pushes to `gh-pages` branch
+3. GitHub Pages serves the static files
+
+### Environment Configuration
+- Production builds use environment variables with fallbacks
+- Firebase is configured for the GitHub Pages domain
+- Vite base URL is set for proper asset loading
 
 ---
 
-Built with ❤️ using React, TypeScript, and modern web technologies.
+
+
+
+
+**Developer**: Saurabh Singh  
+**GitHub**: [@saurabh-singh-9090](https://github.com/saurabh-singh-9090)  
+**Project Link**: [https://github.com/saurabh-singh-9090/data-viz-platform](https://github.com/saurabh-singh-9090/data-viz-platform)
